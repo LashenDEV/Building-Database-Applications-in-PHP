@@ -1,13 +1,16 @@
 <?php
 require_once "pdo.php";
 
+$salt = 'XyZzy12*_';
 
 if (isset($_POST['login'])) {
     //Check if the username or password filled or no
     if (empty($_POST['email']) || empty($_POST['password'])) {
         $message = '<label>Email and password are required</label>';
-    } else if (isset($_POST['email']) && isset($_POST['password'])) { //Email verification
-        if (!preg_match("/@/", $_POST['email'])) {
+
+    } else if (isset($_POST['email']) && isset($_POST['password'])) {
+        //Email verification
+        if (!strpos( $_POST['email'], '@')) {
             $message = '<label>Email must have an at-sign (@)</label>';
         } else {
             $sql = "SELECT name FROM users WHERE email = :email AND password = :password";
@@ -22,10 +25,13 @@ if (isset($_POST['login'])) {
 
 
             if ($row === false) {
-                error_log("Login fail ".$_POST['email']." $row");
+                $check = hash('md5', $salt.$_POST['password']);
+                error_log("Login fail ".$_POST['email']." $check");
                 $message = '<label>Incorrect password</label>';
             } else {
+
                 header("Location: autos.php?name=".urlencode($_POST['email']));
+                error_log("Login success ".$_POST['email']);
             }
         }
     }
@@ -34,6 +40,7 @@ if (isset($_POST['login'])) {
 //Redirection to index.php
 if (isset($_POST['cancel'])) {
     header('Location:index.php');
+    return;
 }
 
 ?>
